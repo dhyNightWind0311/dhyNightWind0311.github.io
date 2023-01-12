@@ -1,0 +1,889 @@
+<html>
+<head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<title>线段树合并 学习笔记 | Duck&#39;s Blog</title>
+
+<link rel="shortcut icon" href="https://dhyNightWind0311.github.io/favicon.ico?v=1673499175819">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://dhyNightWind0311.github.io/styles/main.css">
+<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css"> -->
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.12.0/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.12.0/languages//dart.min.js"></script>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script> -->
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+    
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <a class="navbar-brand" href="/">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Duck&#39;s Blog
+        </div>
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" id="changeNavbar">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+            <div class="nav-item">
+                
+                <a href="/" class="menu gt-a-link">
+                    首页
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/archives" class="menu gt-a-link">
+                    归档
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/tags" class="menu gt-a-link">
+                    标签
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/about" class="menu gt-a-link">
+                    关于
+                </a>
+                
+            </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1673499175819"
+                action="/search/">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+<script>
+    /* 移动端导航栏展开/收起切换 */
+    document.getElementById('changeNavbar').onclick = () => {
+        var element = document.getElementById('navbarSupportedContent');
+        if (element.style.display === 'none' || element.style.display === '') {
+            element.style.display = 'block';
+        } else {
+            element.style.display = 'none';
+        }
+    }
+</script>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    线段树合并 学习笔记
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2022-11-22 ·
+                    </time>
+                    
+                        <a href="https://dhyNightWind0311.github.io/tag/xMgYzKDs1/" class="post-tags">
+                            # 学习笔记
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <p>联考学到的新科技。</p>
+<!-- more -->
+<h2 id="0x00-前言">0x00 前言</h2>
+<p>封闭的第一次模拟赛遇到了这个科技，因为完全不会喜提 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>20</mn><mtext>pts</mtext></mrow><annotation encoding="application/x-tex">20 \text{pts}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8388800000000001em;vertical-align:-0.19444em;"></span><span class="mord">2</span><span class="mord">0</span><span class="mord text"><span class="mord">pts</span></span></span></span></span> 。</p>
+<p>事后发现这个东西很好玩，赶紧学了一下。</p>
+<h2 id="0x01-概念">0x01 概念</h2>
+<p>线段树合并是将两棵值域相同的权值线段树合并的算法，一般用来合并动态开点权值线段树。</p>
+<p>普通权值线段树也可以合并，但是意义不大。</p>
+<p>其本质是对应位置相加，虽然看起来很暴力，但一次合并的复杂度是优秀的 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mi>log</mi><mo>⁡</mo><mi>n</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">O(\log{n})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathdefault">n</span></span><span class="mclose">)</span></span></span></span> 。证明在此不展开。</p>
+<p>实现上跟正常动态开点权值线段树几乎一致，差别只在合并上。</p>
+<p>实现参考如下：</p>
+<pre><code class="language-cpp">int merge(int u, int v, int l, int r) {
+    if (u == 0) return v;
+    if (v == 0) return u;
+    if (l == r) {
+        sum[u] += sum[v];
+        return u;
+    }
+    int mid = (l + r) &gt;&gt; 1;
+    ls[u] = merge(ls[u], ls[v], l, mid);
+    rs[u] = merge(rs[u], rs[v], mid + 1, r);
+    return pushup(u), u;
+}
+</code></pre>
+<h2 id="0x02-例题">0x02 例题</h2>
+<p><a href="https://www.luogu.com.cn/problem/AT_abc183_f">[ABC183F] Confluence</a></p>
+<p><s>这是我找到的最模板的线段树合并</s></p>
+<p>并查集维护连通性，在权值线段树上单点查询，注意并查集的合并方向要和权值线段树保持一致。</p>
+<p>时间复杂度 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mi>n</mi><mi>log</mi><mo>⁡</mo><mi>n</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">O(n\log{n})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathdefault">n</span></span><span class="mclose">)</span></span></span></span> 。</p>
+<h3 id="code">Code</h3>
+<pre><code class="language-cpp">#include &lt;bits/stdc++.h&gt;
+using namespace std;
+
+const int MAXN = 2e5 + 5, MAXM = 64e5 + 5;
+
+template&lt;class T = int&gt; inline T read() {
+    T ret = 0;
+    int f = 0, ch = getchar();
+    while (ch &lt; '0' || ch &gt; '9') f ^= ch == '-', ch = getchar();
+    while ('0' &lt;= ch &amp;&amp; ch &lt;= '9') ret = ret * 10 + ch - '0', ch = getchar();
+    return f ? -ret : ret;
+}
+
+int n, q, fa[MAXN], c[MAXN];
+
+int get(int x) {
+    return x == fa[x] ? x : fa[x] = get(fa[x]);
+}
+
+inline void un(int x, int y) {
+    x = get(x), y = get(y);
+    fa[y] = x;
+}
+
+int ls[MAXM], rs[MAXM], sum[MAXM], tot;
+
+inline void pushup(int rt) {
+    sum[rt] = sum[ls[rt]] + sum[rs[rt]];
+}
+
+void update(int &amp;rt, int l, int r, int pos, int x) {
+    if (!rt) rt = ++tot;
+    if (l == r) {
+        sum[rt] += x;
+        return;
+    }
+    int mid = (l + r) &gt;&gt; 1;
+    if (pos &lt;= mid) update(ls[rt], l, mid, pos, x);
+    else update(rs[rt], mid + 1, r, pos, x);
+    pushup(rt);
+}
+
+int merge(int u, int v, int l, int r) {
+    if (u == 0) return v;
+    if (v == 0) return u;
+    if (l == r) {
+        sum[u] += sum[v];
+        return u;
+    }
+    int mid = (l + r) &gt;&gt; 1;
+    ls[u] = merge(ls[u], ls[v], l, mid);
+    rs[u] = merge(rs[u], rs[v], mid + 1, r);
+    return pushup(u), u;
+}
+
+int query(int rt, int l, int r, int pos) {
+    if (!rt) return 0;
+    if (l == r) return sum[rt];
+    int mid = (l + r) &gt;&gt; 1;
+    if (pos &lt;= mid) return query(ls[rt], l, mid, pos);
+    else return query(rs[rt], mid + 1, r, pos);
+}
+
+int rt[MAXN];
+
+int main() {
+    n = read(), q = read();
+    for (int i = 1; i &lt;= n; i++) {
+        c[i] = read();
+        update(rt[i], 1, n, c[i], 1);
+        fa[i] = i;
+    }
+    while (q--) {
+        int opt = read(), x = read(), y = read();
+        if (opt == 1) {
+            x = get(x), y = get(y);
+            if (x == y) continue;
+            un(x, y);
+            merge(rt[x], rt[y], 1, n);
+        } else {
+            x = get(x);
+            printf(&quot;%d\n&quot;, query(rt[x], 1, n, y));
+        }
+    }
+}
+</code></pre>
+<p><a href="https://www.luogu.com.cn/problem/P3224">P3224 [HNOI2012]永无乡</a></p>
+<p>与上一题几乎一致，唯一需要改动的是权值线段树维护第 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.03148em;">k</span></span></span></span> 小。</p>
+<p>其余不展开，时间复杂度 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mi>n</mi><mi>log</mi><mo>⁡</mo><mi>n</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">O(n\log{n})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathdefault">n</span></span><span class="mclose">)</span></span></span></span> 。</p>
+<h3 id="code-2">Code</h3>
+<pre><code class="language-cpp">#include &lt;bits/stdc++.h&gt;
+using namespace std;
+
+const int MAXN = 1e5 + 5, MAXM = MAXN &lt;&lt; 6;
+
+int n, m, q, fa[MAXN];
+
+int get(int x) {
+    return x == fa[x] ? x : fa[x] = get(fa[x]);
+}
+
+inline void un(int x, int y) {
+    x = get(x), y = get(y);
+    fa[y] = x;
+}
+
+int ls[MAXM], rs[MAXM], sum[MAXM], id[MAXM], tot;
+
+inline void pushup(int rt) {
+    sum[rt] = sum[ls[rt]] + sum[rs[rt]];
+}
+
+void update(int &amp;rt, int l, int r, int pos, int x) {
+    if (!rt) rt = ++tot;
+    if (l == r) {
+        sum[rt]++, id[rt] = x;
+        return;
+    }
+    int mid = (l + r) &gt;&gt; 1;
+    if (pos &lt;= mid) update(ls[rt], l, mid, pos, x);
+    else update(rs[rt], mid + 1, r, pos, x);
+    pushup(rt);
+}
+
+int merge(int u, int v, int l, int r) {
+    if (u == 0) return v;
+    if (v == 0) return u;
+    if (l == r) {
+        sum[u] += sum[v], id[u] = id[v];
+        return u;
+    }
+    int mid = (l + r) &gt;&gt; 1;
+    ls[u] = merge(ls[u], ls[v], l, mid);
+    rs[u] = merge(rs[u], rs[v], mid + 1, r);
+    return pushup(u), u;
+}
+
+int query(int rt, int l, int r, int k) {
+    if (k &lt;= 0) return -1;
+    if (l == r) return id[rt] ? id[rt] : -1;
+    int mid = (l + r) &gt;&gt; 1;
+    if (sum[ls[rt]] &gt;= k) return query(ls[rt], l, mid, k);
+    return query(rs[rt], mid + 1, r, k - sum[ls[rt]]);
+}
+
+int rt[MAXN];
+
+template&lt;class T = int&gt; inline T read() {
+    T ret = 0;
+    int f = 0, ch = getchar();
+    while (ch &lt; '0' || ch &gt; '9') f ^= ch == '-', ch = getchar();
+    while ('0' &lt;= ch &amp;&amp; ch &lt;= '9') ret = ret * 10 + ch - '0', ch = getchar();
+    return f ? -ret : ret;
+}
+
+char opt[2];
+
+int main() {
+    n = read(), m = read();
+    for (int i = 1, p; i &lt;= n; i++) {
+        fa[i] = i, p = read();
+        update(rt[i], 1, n, p, i);
+    }
+    while (m--) {
+        int u = get(read()), v = get(read());
+        un(u, v);
+        rt[u] = merge(rt[u], rt[v], 1, n);
+    }
+    q = read();
+    while (q--) {
+        scanf(&quot;%s&quot;, opt);
+        int x = read(), y = read();
+        if (opt[0] == 'Q') {
+            x = get(x);
+            printf(&quot;%d\n&quot;, query(rt[x], 1, n, y));
+        } else {
+            x = get(x), y = get(y);
+            un(x, y);
+            rt[x] = merge(rt[x], rt[y], 1, n);
+        }
+    }
+}
+</code></pre>
+<h2 id="0x03-应用">0x03 应用</h2>
+<p><a href="https://www.luogu.com.cn/problem/P4556">P4556 【模板】线段树合并</a></p>
+<p><s>为什么拿这个题当模板啊</s></p>
+<p>我们在树的每一个节点上开一棵权值线段树，通过树上差分把路径操作转化为单点操作。</p>
+<p>于是问题转化为在权值线段树上单点修改，并记录出现次数最大值所在位置。</p>
+<p>我们全部修改完后通过线段树合并的方式合并子树答案，时间复杂度 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mi>n</mi><mi>log</mi><mo>⁡</mo><mi>n</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">O(n\log{n})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathdefault">n</span></span><span class="mclose">)</span></span></span></span> 。</p>
+<p>在这里采用了树剖的方式处理 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>l</mi><mi>c</mi><mi>a</mi></mrow><annotation encoding="application/x-tex">lca</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">c</span><span class="mord mathdefault">a</span></span></span></span> ，比倍增要略优一些。</p>
+<h3 id="code-3">Code</h3>
+<pre><code class="language-cpp">#include &lt;bits/stdc++.h&gt;
+using namespace std;
+
+const int MAXN = 1e5 + 5, MAXM = 8e6 + 5, R = 1e5;
+
+struct edge {
+    int v, next;
+    edge() = default;
+} e[MAXN * 2];
+
+int p[MAXN], n, m, eid;
+
+inline void add(int u, int v) {
+    e[eid].v = v;
+    e[eid].next = p[u];
+    p[u] = eid++;
+}
+
+int dep[MAXN], fa[MAXN], son[MAXN], top[MAXN], sz[MAXN];
+
+void dfs(int u, int f) {
+    sz[u] = 1;
+    dep[u] = dep[f] + 1;
+    fa[u] = f;
+    son[u] = -1;
+    for (int i = p[u]; i != -1; i = e[i].next) {
+        int v = e[i].v;
+        if (v == f) continue;
+        dfs(v, u);
+        sz[u] += sz[v];
+        if (son[u] == -1 || sz[v] &gt; sz[son[u]]) son[u] = v;
+    }
+}
+
+void dfs_(int u, int t) {
+    top[u] = t;
+    if (son[u] == -1) return;
+    dfs_(son[u], t);
+    for (int i = p[u]; i != -1; i = e[i].next) {
+        int v = e[i].v;
+        if (v != fa[u] &amp;&amp; v != son[u]) dfs_(v, v);
+    }
+}
+
+int lca(int x, int y) {
+    while (top[x] != top[y]) {
+        if (dep[top[x]] &lt; dep[top[y]]) swap(x, y);
+        x = fa[top[x]];
+    }
+    if (dep[x] &gt; dep[y]) swap(x, y);
+    return x;
+}
+
+int pos[MAXM], sum[MAXM], ls[MAXM], rs[MAXM], tot;
+
+inline void pushup(int rt) {
+    if (sum[ls[rt]] &gt;= sum[rs[rt]]) {
+        sum[rt] = sum[ls[rt]];
+        pos[rt] = pos[ls[rt]];
+    } else {
+        sum[rt] = sum[rs[rt]];
+        pos[rt] = pos[rs[rt]];
+    }
+}
+
+void update(int &amp;rt, int l, int r, int x, int k) {
+    if (!rt) rt = ++tot;
+    if (l == r) {
+        sum[rt] += k, pos[rt] = x;
+        return;
+    }
+    int mid = (l + r) &gt;&gt; 1;
+    if (x &lt;= mid) update(ls[rt], l, mid, x, k);
+    else update(rs[rt], mid + 1, r, x, k);
+    pushup(rt);
+}
+
+int merge(int u, int v, int l, int r) {
+    if (u == 0) return v;
+    if (v == 0) return u;
+    if (l == r) {
+        sum[u] += sum[v];
+        return u;
+    }
+    int mid = (l + r) &gt;&gt; 1;
+    ls[u] = merge(ls[u], ls[v], l, mid);
+    rs[u] = merge(rs[u], rs[v], mid + 1, r);
+    pushup(u); return u;
+}
+
+int rt[MAXN], ans[MAXN];
+
+void dfs(int u) {
+    for (int i = p[u]; i != -1; i = e[i].next) {
+        int v = e[i].v;
+        if (v == fa[u]) continue;
+        dfs(v);
+        rt[u] = merge(rt[u], rt[v], 1, R);
+    }
+    ans[u] = pos[rt[u]];
+    if (sum[rt[u]] == 0) ans[u] = 0;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin &gt;&gt; n &gt;&gt; m;
+    memset(p, -1, sizeof(p));
+    for (int i = 1, u, v; i &lt; n; i++) {
+        cin &gt;&gt; u &gt;&gt; v;
+        add(u, v);
+        add(v, u);
+    }
+    dfs(1, 1), dfs_(1, 1);
+    while (m--) {
+        int x, y, z;
+        cin &gt;&gt; x &gt;&gt; y &gt;&gt; z;
+        update(rt[x], 1, R, z, 1);
+        update(rt[y], 1, R, z, 1);
+        int l = lca(x, y);
+        update(rt[l], 1, R, z, -1);
+        if (l != 1) update(rt[fa[l]], 1, R, z, -1);
+    }
+    dfs(1);
+    for (int i = 1; i &lt;= n; i++) cout &lt;&lt; ans[i] &lt;&lt; endl;
+}
+</code></pre>
+<p><a href="https://www.luogu.com.cn/problem/P1600">P1600 [NOIP2016 提高组] 天天爱跑步</a></p>
+<p>考虑枚举观察员，计算每一个选手对观察员可能做出的贡献。</p>
+<p>对于一条跑步路线 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>(</mo><mi>s</mi><mo separator="true">,</mo><mi>t</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">(s,t)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathdefault">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">t</span><span class="mclose">)</span></span></span></span> ，设 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>l</mi><mo>=</mo><mi mathvariant="normal">lca</mi><mo>⁡</mo><mo>(</mo><mi>s</mi><mo separator="true">,</mo><mi>t</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">l=\operatorname{lca}(s,t)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop"><span class="mord mathrm">l</span><span class="mord mathrm">c</span><span class="mord mathrm">a</span></span><span class="mopen">(</span><span class="mord mathdefault">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">t</span><span class="mclose">)</span></span></span></span> ，并把路径拆成 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>(</mo><mi>s</mi><mo separator="true">,</mo><mi>l</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">(s,l)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathdefault">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mclose">)</span></span></span></span> 和 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>(</mo><mi>l</mi><mo separator="true">,</mo><mi>t</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">(l,t)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">t</span><span class="mclose">)</span></span></span></span> 两段。</p>
+<p>如果路径 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>(</mo><mi>s</mi><mo separator="true">,</mo><mi>t</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">(s,t)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathdefault">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">t</span><span class="mclose">)</span></span></span></span> 能对观察员 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault">x</span></span></span></span> 做出贡献，则需要满足 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>d</mi><mi>i</mi><mi>s</mi><mo>(</mo><mi>s</mi><mo separator="true">,</mo><mi>x</mi><mo>)</mo><mo>=</mo><msub><mi>w</mi><mi>x</mi></msub></mrow><annotation encoding="application/x-tex">dis(s,x)=w_x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault">d</span><span class="mord mathdefault">i</span><span class="mord mathdefault">s</span><span class="mopen">(</span><span class="mord mathdefault">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">x</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.02691em;">w</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.02691em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">x</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 。</p>
+<p>分类讨论：</p>
+<ul>
+<li>如果 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault">x</span></span></span></span> 在路径 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>(</mo><mi>s</mi><mo separator="true">,</mo><mi>l</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">(s,l)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathdefault">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mclose">)</span></span></span></span> 上，转换一下就是</li>
+</ul>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>d</mi><mi>e</mi><msub><mi>p</mi><mi>s</mi></msub><mo>=</mo><msub><mi>w</mi><mi>x</mi></msub><mo>+</mo><mi>d</mi><mi>e</mi><msub><mi>p</mi><mi>x</mi></msub></mrow><annotation encoding="application/x-tex">dep_s=w_x+dep_x
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault">d</span><span class="mord mathdefault">e</span><span class="mord"><span class="mord mathdefault">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">s</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.73333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.02691em;">w</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.02691em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">x</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault">d</span><span class="mord mathdefault">e</span><span class="mord"><span class="mord mathdefault">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">x</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span></p>
+<ul>
+<li>如果 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault">x</span></span></span></span> 在路径 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>(</mo><mi>l</mi><mo separator="true">,</mo><mi>t</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">(l,t)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">t</span><span class="mclose">)</span></span></span></span> 上，转换一下就是</li>
+</ul>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>d</mi><mi>e</mi><msub><mi>p</mi><mi>s</mi></msub><mo>+</mo><mi>d</mi><mi>e</mi><msub><mi>p</mi><mi>x</mi></msub><mo>−</mo><mn>2</mn><mo>×</mo><mi>d</mi><mi>e</mi><msub><mi>p</mi><mi>l</mi></msub><mo>=</mo><msub><mi>w</mi><mi>x</mi></msub></mrow><annotation encoding="application/x-tex">dep_s+dep_x-2\times dep_l=w_x
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault">d</span><span class="mord mathdefault">e</span><span class="mord"><span class="mord mathdefault">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">s</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault">d</span><span class="mord mathdefault">e</span><span class="mord"><span class="mord mathdefault">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">x</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">2</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault">d</span><span class="mord mathdefault">e</span><span class="mord"><span class="mord mathdefault">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.01968em;">l</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.02691em;">w</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.02691em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">x</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span></p>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>2</mn><mo>×</mo><mi>d</mi><mi>e</mi><msub><mi>p</mi><mi>l</mi></msub><mo>−</mo><mi>d</mi><mi>e</mi><msub><mi>p</mi><mi>s</mi></msub><mo>=</mo><mi>d</mi><mi>e</mi><msub><mi>p</mi><mi>x</mi></msub><mo>−</mo><msub><mi>w</mi><mi>x</mi></msub></mrow><annotation encoding="application/x-tex">2\times dep_l-dep_s=dep_x-w_x
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">2</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault">d</span><span class="mord mathdefault">e</span><span class="mord"><span class="mord mathdefault">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.01968em;">l</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault">d</span><span class="mord mathdefault">e</span><span class="mord"><span class="mord mathdefault">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">s</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault">d</span><span class="mord mathdefault">e</span><span class="mord"><span class="mord mathdefault">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">x</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.02691em;">w</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.02691em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">x</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span></p>
+<p>到这里我们要维护的东西应该很明确了。</p>
+<p>在每一个点上开一棵权值线段树，通过树上差分把路径操作转换为单点操作。</p>
+<p>对于路径 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>(</mo><mi>s</mi><mo separator="true">,</mo><mi>t</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">(s,t)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathdefault">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">t</span><span class="mclose">)</span></span></span></span> ，在 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex">s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault">s</span></span></span></span> 上标记 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>d</mi><mi>e</mi><msub><mi>p</mi><mi>s</mi></msub></mrow><annotation encoding="application/x-tex">dep_s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault">d</span><span class="mord mathdefault">e</span><span class="mord"><span class="mord mathdefault">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">s</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 并在 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>l</mi></mrow><annotation encoding="application/x-tex">l</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span></span></span></span> 处撤销，在 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>t</mi></mrow><annotation encoding="application/x-tex">t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.61508em;vertical-align:0em;"></span><span class="mord mathdefault">t</span></span></span></span> 上标记 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>2</mn><mo>×</mo><mi>d</mi><mi>e</mi><msub><mi>p</mi><mi>l</mi></msub><mo>−</mo><mi>d</mi><mi>e</mi><msub><mi>p</mi><mi>s</mi></msub></mrow><annotation encoding="application/x-tex">2\times dep_l-dep_s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">2</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault">d</span><span class="mord mathdefault">e</span><span class="mord"><span class="mord mathdefault">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.01968em;">l</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault">d</span><span class="mord mathdefault">e</span><span class="mord"><span class="mord mathdefault">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">s</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 并在 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>f</mi><mi>a</mi><mo>[</mo><mi>l</mi><mo>]</mo></mrow><annotation encoding="application/x-tex">fa[l]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="mord mathdefault">a</span><span class="mopen">[</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mclose">]</span></span></span></span> 上撤销。</p>
+<p>最后通过线段树合并统计答案。注意可能会产生负数，可以通过平移值域解决。</p>
+<p>时间复杂度 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mi>n</mi><mi>log</mi><mo>⁡</mo><mi>n</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">O(n\log{n})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathdefault">n</span></span><span class="mclose">)</span></span></span></span> 。</p>
+<h3 id="code-4">Code</h3>
+<pre><code class="language-cpp">#include &lt;bits/stdc++.h&gt;
+#define fill(a, x) memset(a, x, sizeof(a))
+using namespace std;
+
+const int MAXN = 3e5 + 5;
+
+struct edge {
+    int v, next;
+    edge() = default;
+} e[MAXN * 2];
+
+int p[MAXN], w[MAXN], n, m, eid;
+
+inline void insert(int u, int v) {
+    e[eid].v = v;
+    e[eid].next = p[u];
+    p[u] = eid++;
+}
+
+int dep[MAXN], fa[MAXN], son[MAXN], top[MAXN], sz[MAXN];
+
+void dfs1(int u, int f) {
+    sz[u] = 1;
+    dep[u] = dep[f] + 1;
+    fa[u] = f;
+    son[u] = -1;
+    for (int i = p[u]; i != -1; i = e[i].next) {
+        int v = e[i].v;
+        if (v == f) continue;
+        dfs1(v, u);
+        sz[u] += sz[v];
+        if (son[u] == -1 || sz[v] &gt; sz[son[u]]) son[u] = v;
+    }
+}
+
+void dfs2(int u, int t) {
+    top[u] = t;
+    if (son[u] == -1) return;
+    dfs2(son[u], t);
+    for (int i = p[u]; i != -1; i = e[i].next) {
+        int v = e[i].v;
+        if (v != fa[u] &amp;&amp; v != son[u]) dfs2(v, v);
+    }
+}
+
+int lca(int x, int y) {
+    while (top[x] != top[y]) {
+        if (dep[top[x]] &lt; dep[top[y]]) swap(x, y);
+        x = fa[top[x]];
+    }
+    if (dep[x] &gt; dep[y]) swap(x, y);
+    return x;
+}
+
+const int MAXM = MAXN &lt;&lt; 6;
+
+int sum[MAXM], ls[MAXM], rs[MAXM], tot;
+
+void update(int &amp;rt, int l, int r, int pos, int x) {
+    if (!rt) rt = ++tot;
+    if (l == r) {
+        sum[rt] += x;
+        return;
+    }
+    int mid = (l + r) &gt;&gt; 1;
+    if (pos &lt;= mid) update(ls[rt], l, mid, pos, x);
+    else update(rs[rt], mid + 1, r, pos, x);
+}
+
+int merge(int u, int v, int l, int r) {
+    if (u == 0) return v;
+    if (v == 0) return u;
+    if (l == r) {
+        sum[u] += sum[v];
+        return u;
+    }
+    int mid = (l + r) &gt;&gt; 1;
+    ls[u] = merge(ls[u], ls[v], l, mid);
+    rs[u] = merge(rs[u], rs[v], mid + 1, r);
+    return u;
+}
+
+int query(int rt, int l, int r, int pos) {
+    if (!rt) return 0;
+    if (l == r) return sum[rt];
+    int mid = (l + r) &gt;&gt; 1;
+    if (pos &lt;= mid) return query(ls[rt], l, mid, pos);
+    else return query(rs[rt], mid + 1, r, pos);
+}
+
+int rt[MAXN], ans[MAXN];
+
+void dfs(int u) {
+    for (int i = p[u]; i != -1; i = e[i].next) {
+        int v = e[i].v;
+        if (v == fa[u]) continue;
+        dfs(v);
+        rt[u] = merge(rt[u], rt[v], 1, n * 2);
+    }
+    if (w[u] &amp;&amp; dep[u] + w[u] &lt;= n) 
+    	ans[u] += query(rt[u], 1, n * 2, n + dep[u] + w[u]);
+    ans[u] += query(rt[u], 1, n * 2, n + dep[u] - w[u]);
+}
+
+template&lt;class T = int&gt; inline T read() {
+    T ret = 0;
+    int f = 0, ch = getchar();
+    while (ch &lt; '0' || ch &gt; '9') f ^= ch == '-', ch = getchar();
+    while ('0' &lt;= ch &amp;&amp; ch &lt;= '9') ret = ret * 10 + ch - '0', ch = getchar();
+    return f ? -ret : ret;
+}
+
+int main() {
+    n = read(), m = read();
+    fill(p, -1);
+    for (int i = 1, u, v; i &lt; n; i++) {
+        u = read(), v = read();
+        insert(u, v);
+        insert(v, u);
+    }
+    dfs1(1, 1), dfs2(1, 1);
+    for (int i = 1; i &lt;= n; i++) w[i] = read();
+    while (m--) {
+        int x = read(), y = read();
+        int l = lca(x, y);
+        update(rt[x], 1, n * 2, n + dep[x], 1);
+        update(rt[y], 1, n * 2, n + 2 * dep[l] - dep[x], 1);
+        update(rt[l], 1, n * 2, n + dep[x], -1);
+        if (l != 1) update(rt[fa[l]], 1, n * 2, n + 2 * dep[l] - dep[x], -1);
+    }
+    dfs(1);
+    for (int i = 1; i &lt;= n; i++) printf(&quot;%d%c&quot;, ans[i], &quot; \n&quot;[i == n]);
+}
+</code></pre>
+<p><a href="https://www.luogu.com.cn/problem/P3605">P3605 Promotion Counting</a></p>
+<p><s>相比前两个题简单很多</s></p>
+<p>先离散化，仍然是对每个点开权值线段树，答案只需要区间求和即可。</p>
+<p>时间复杂度 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mi>n</mi><mi>log</mi><mo>⁡</mo><mi>n</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">O(n\log{n})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathdefault">n</span></span><span class="mclose">)</span></span></span></span> 。</p>
+<h3 id="code-5">Code</h3>
+<pre><code class="language-cpp">#include &lt;bits/stdc++.h&gt;
+using namespace std;
+
+const int MAXN = 1e5 + 5, MAXM = 128e5 + 5;
+
+vector&lt;int&gt; g[MAXN];
+
+int n, m, p[MAXN], tmp[MAXN];
+
+int ls[MAXM], rs[MAXM], sum[MAXM], tot;
+
+inline void pushup(int rt) {
+    sum[rt] = sum[ls[rt]] + sum[rs[rt]];
+}
+
+void update(int &amp;rt, int l, int r, int pos) {
+    if (!rt) rt = ++tot;
+    if (l == r) return sum[rt]++, void();
+    int mid = (l + r) &gt;&gt; 1;
+    if (pos &lt;= mid) update(ls[rt], l, mid, pos);
+    else update(rs[rt], mid + 1, r, pos);
+    pushup(rt);
+}
+
+int merge(int u, int v, int l, int r) {
+    if (u == 0) return v;
+    if (v == 0) return u;
+    if (l == r) {
+        sum[u] += sum[v];
+        return u;
+    }
+    int mid = (l + r) &gt;&gt; 1;
+    ls[u] = merge(ls[u], ls[v], l, mid);
+    rs[u] = merge(rs[u], rs[v], mid + 1, r);
+    return pushup(u), u;
+}
+
+int query(int rt, int l, int r, int x, int y) {
+    if (x &lt;= l &amp;&amp; r &lt;= y) return sum[rt];
+    if (y &lt; l || r &lt; x || rt == 0) return 0;
+    int mid = (l + r) &gt;&gt; 1;
+    return query(ls[rt], l, mid, x, y) + query(rs[rt], mid + 1, r, x, y);
+}
+
+int rt[MAXN], ans[MAXN];
+
+void dfs(int u) {
+    for (int v: g[u]) {
+        dfs(v);
+        rt[u] = merge(rt[u], rt[v], 1, m);
+    }
+    ans[u] = query(rt[u], 1, m, p[u] + 1, m);
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin &gt;&gt; n;
+    for (int i = 1; i &lt;= n; i++) {
+        cin &gt;&gt; p[i];
+        tmp[i] = p[i];
+    }
+    sort(tmp + 1, tmp + n + 1);
+    m = unique(tmp + 1, tmp + n + 1) - tmp - 1;
+    for (int i = 1; i &lt;= n; i++) {
+        p[i] = lower_bound(tmp + 1, tmp + m, p[i]) - tmp;
+        update(rt[i], 1, m, p[i]);
+    }
+    for (int i = 2, fa; i &lt;= n; i++) {
+        cin &gt;&gt; fa;
+        g[fa].push_back(i);
+    }
+    dfs(1);
+    for (int i = 1; i &lt;= n; i++) cout &lt;&lt; ans[i] &lt;&lt; endl;
+}
+</code></pre>
+<p><a href="https://www.luogu.com.cn/problem/P3521">P3521 Tree Rotations</a></p>
+<p><s>一个线段树合并的非常规应用？</s></p>
+<p>考虑交换一个点的左右子树，对于左右子树本身的逆序对数量是不会有影响的，有影响的只有横跨左右子树产生的逆序对。</p>
+<p>我们在每个叶子节点上开一棵权值线段树，记录它本身的权值。</p>
+<p>在不断向上合并的过程中，由于我们维护的是值域，所以很容易计算出横跨左右子树的逆序对数量。</p>
+<p>我们分别对交换和不交换维护两个答案，最后取 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>min</mi><mo>⁡</mo></mrow><annotation encoding="application/x-tex">\min</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.66786em;vertical-align:0em;"></span><span class="mop">min</span></span></span></span> 即可。</p>
+<p><s>输入比较毒瘤。</s> 时间复杂度 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mi>n</mi><mi>log</mi><mo>⁡</mo><mi>n</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">O(n\log{n})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathdefault">n</span></span><span class="mclose">)</span></span></span></span> 。</p>
+<h3 id="code-6">Code</h3>
+<pre><code class="language-cpp">#include &lt;bits/stdc++.h&gt;
+using namespace std;
+
+const int MAXN = 2e5 * 64 + 5;
+
+int n, ls[MAXN], rs[MAXN], sum[MAXN], tot;
+
+long long ans, ans1, ans2;
+
+inline void pushup(int rt) {
+    sum[rt] = sum[ls[rt]] + sum[rs[rt]];
+}
+
+int update(int l, int r, int pos) {
+    int u = ++tot;
+    sum[u]++;
+    if (l == r) return u;
+    int mid = (l + r) &gt;&gt; 1;
+    if (pos &lt;= mid) ls[u] = update(l, mid, pos);
+    else rs[u] = update(mid + 1, r, pos);
+    return u;
+}
+
+int merge(int u, int v, int l, int r) {
+    if (u == 0) return v;
+    if (v == 0) return u;
+    if (l == r) {
+        sum[u] += sum[v];
+        return u;
+    }
+    ans1 += 1ll * sum[ls[u]] * sum[rs[v]];  // swap
+    ans2 += 1ll * sum[rs[u]] * sum[ls[v]];  // not swap
+    int mid = (l + r) &gt;&gt; 1;
+    ls[u] = merge(ls[u], ls[v], l, mid);
+    rs[u] = merge(rs[u], rs[v], mid + 1, r);
+    return pushup(u), u;
+}
+
+template&lt;class T = int&gt; inline T read() {
+    T ret = 0;
+    int f = 0, ch = getchar();
+    while (ch &lt; '0' || ch &gt; '9') f ^= ch == '-', ch = getchar();
+    while ('0' &lt;= ch &amp;&amp; ch &lt;= '9') ret = ret * 10 + ch - '0', ch = getchar();
+    return f ? -ret : ret;
+}
+
+int dfs() {
+    int rt, val = read();
+    if (val == 0) {
+        int lc = dfs(), rc = dfs();
+        ans1 = ans2 = 0;
+        rt = merge(lc, rc, 1, n);
+        ans += min(ans1, ans2);
+    }
+    else rt = update(1, n, val);
+    return rt;
+}
+
+int main() {
+    n = read();
+    dfs();
+    printf(&quot;%lld\n&quot;, ans);
+}
+</code></pre>
+<p><a href="https://www.luogu.com.cn/problem/P3201">P3201 [HNOI2009] 梦幻布丁</a></p>
+<p><a href="https://www.luogu.com.cn/problem/CF600E">CF600E Lomsat gelral</a></p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://dhyNightWind0311.github.io/post/codeforces-round-820-div-3/" class="post-title gt-a-link">
+                    Codeforces Round #820 (Div. 3)
+                </a>
+            </div>
+        
+
+        
+
+        
+            
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk/dist/gitalk.min.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk/dist/gitalk.min.js"></script>
+<script>
+    // md5.min.js
+    !function(n){
+        "use strict";
+        function d(n,t){var r=(65535&n)+(65535&t);return(n>>16)+(t>>16)+(r>>16)<<16|65535&r}
+        function f(n,t,r,e,o,u){return d((c=d(d(t,n),d(e,u)))<<(f=o)|c>>>32-f,r);var c,f}
+        function l(n,t,r,e,o,u,c){return f(t&r|~t&e,n,t,o,u,c)}
+        function v(n,t,r,e,o,u,c){return f(t&e|r&~e,n,t,o,u,c)}
+        function g(n,t,r,e,o,u,c){return f(t^r^e,n,t,o,u,c)}
+        function m(n,t,r,e,o,u,c){return f(r^(t|~e),n,t,o,u,c)}
+        function i(n,t){var r,e,o,u,c;n[t>>5]|=128<<t%32,n[14+(t+64>>>9<<4)]=t;var f=1732584193,i=-271733879,a=-1732584194,h=271733878;for(r=0;r<n.length;r+=16)f=l(e=f,o=i,u=a,c=h,n[r],7,-680876936),h=l(h,f,i,a,n[r+1],12,-389564586),a=l(a,h,f,i,n[r+2],17,606105819),i=l(i,a,h,f,n[r+3],22,-1044525330),f=l(f,i,a,h,n[r+4],7,-176418897),h=l(h,f,i,a,n[r+5],12,1200080426),a=l(a,h,f,i,n[r+6],17,-1473231341),i=l(i,a,h,f,n[r+7],22,-45705983),f=l(f,i,a,h,n[r+8],7,1770035416),h=l(h,f,i,a,n[r+9],12,-1958414417),a=l(a,h,f,i,n[r+10],17,-42063),i=l(i,a,h,f,n[r+11],22,-1990404162),f=l(f,i,a,h,n[r+12],7,1804603682),h=l(h,f,i,a,n[r+13],12,-40341101),a=l(a,h,f,i,n[r+14],17,-1502002290),f=v(f,i=l(i,a,h,f,n[r+15],22,1236535329),a,h,n[r+1],5,-165796510),h=v(h,f,i,a,n[r+6],9,-1069501632),a=v(a,h,f,i,n[r+11],14,643717713),i=v(i,a,h,f,n[r],20,-373897302),f=v(f,i,a,h,n[r+5],5,-701558691),h=v(h,f,i,a,n[r+10],9,38016083),a=v(a,h,f,i,n[r+15],14,-660478335),i=v(i,a,h,f,n[r+4],20,-405537848),f=v(f,i,a,h,n[r+9],5,568446438),h=v(h,f,i,a,n[r+14],9,-1019803690),a=v(a,h,f,i,n[r+3],14,-187363961),i=v(i,a,h,f,n[r+8],20,1163531501),f=v(f,i,a,h,n[r+13],5,-1444681467),h=v(h,f,i,a,n[r+2],9,-51403784),a=v(a,h,f,i,n[r+7],14,1735328473),f=g(f,i=v(i,a,h,f,n[r+12],20,-1926607734),a,h,n[r+5],4,-378558),h=g(h,f,i,a,n[r+8],11,-2022574463),a=g(a,h,f,i,n[r+11],16,1839030562),i=g(i,a,h,f,n[r+14],23,-35309556),f=g(f,i,a,h,n[r+1],4,-1530992060),h=g(h,f,i,a,n[r+4],11,1272893353),a=g(a,h,f,i,n[r+7],16,-155497632),i=g(i,a,h,f,n[r+10],23,-1094730640),f=g(f,i,a,h,n[r+13],4,681279174),h=g(h,f,i,a,n[r],11,-358537222),a=g(a,h,f,i,n[r+3],16,-722521979),i=g(i,a,h,f,n[r+6],23,76029189),f=g(f,i,a,h,n[r+9],4,-640364487),h=g(h,f,i,a,n[r+12],11,-421815835),a=g(a,h,f,i,n[r+15],16,530742520),f=m(f,i=g(i,a,h,f,n[r+2],23,-995338651),a,h,n[r],6,-198630844),h=m(h,f,i,a,n[r+7],10,1126891415),a=m(a,h,f,i,n[r+14],15,-1416354905),i=m(i,a,h,f,n[r+5],21,-57434055),f=m(f,i,a,h,n[r+12],6,1700485571),h=m(h,f,i,a,n[r+3],10,-1894986606),a=m(a,h,f,i,n[r+10],15,-1051523),i=m(i,a,h,f,n[r+1],21,-2054922799),f=m(f,i,a,h,n[r+8],6,1873313359),h=m(h,f,i,a,n[r+15],10,-30611744),a=m(a,h,f,i,n[r+6],15,-1560198380),i=m(i,a,h,f,n[r+13],21,1309151649),f=m(f,i,a,h,n[r+4],6,-145523070),h=m(h,f,i,a,n[r+11],10,-1120210379),a=m(a,h,f,i,n[r+2],15,718787259),i=m(i,a,h,f,n[r+9],21,-343485551),f=d(f,e),i=d(i,o),a=d(a,u),h=d(h,c);return[f,i,a,h]}
+        function a(n){var t,r="",e=32*n.length;for(t=0;t<e;t+=8)r+=String.fromCharCode(n[t>>5]>>>t%32&255);return r}
+        function h(n){var t,r=[];for(r[(n.length>>2)-1]=void 0,t=0;t<r.length;t+=1)r[t]=0;var e=8*n.length;for(t=0;t<e;t+=8)r[t>>5]|=(255&n.charCodeAt(t/8))<<t%32;return r}
+        function e(n){var t,r,e="0123456789abcdef",o="";for(r=0;r<n.length;r+=1)t=n.charCodeAt(r),o+=e.charAt(t>>>4&15)+e.charAt(15&t);return o}
+        function r(n){return unescape(encodeURIComponent(n))}
+        function o(n){return a(i(h(t=r(n)),8*t.length));var t}
+        function u(n,t){return function(n,t){var r,e,o=h(n),u=[],c=[];for(u[15]=c[15]=void 0,16<o.length&&(o=i(o,8*n.length)),r=0;r<16;r+=1)u[r]=909522486^o[r],c[r]=1549556828^o[r];return e=i(u.concat(h(t)),512+8*t.length),a(i(c.concat(e),640))}(r(n),r(t))}
+        function t(n,t,r){return t?r?u(t,n):e(u(t,n)):r?o(n):e(o(n))}
+        "function"==typeof define&&define.amd?define(function(){return t}):"object"==typeof module&&module.exports?module.exports=t:n.md5=t;
+    }(this);
+</script>
+
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '5e5d8c521be990be1877',
+    clientSecret: '22e625c691ab2c1bf077cacd2f2c2228ae4b1247',
+    repo: 'dhyNightWind0311.github.io',
+    owner: 'dhyNightWind0311',
+    admin: ['dhyNightWind0311'],
+    id: md5(location.pathname),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false       // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">被石兰兮带杜衡，折芳馨兮遗所思。</div>
+    <div class="social-container">
+        
+            
+                <a href="https://github.com/dhyNightWind0311" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+                <a href="https://twitter.com/dhy0311" target="_blank">
+                    <i class="fab fa-twitter gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+                <a href="https://www.zhihu.com/people/20-92-5-52" target="_blank">
+                    <i class="fab fa-zhihu gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme <a href="https://github.com/imhanjie/gridea-theme-pure" target="_blank">Pure</a>, Powered by <a
+                href="https://gridea.dev" target="_blank">Gridea</a> | <a href="https://dhyNightWind0311.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+</div>
+
+<script>
+  hljs.highlightAll()
+</script>
+
+    </div>
+</div>
+</body>
+</html>
